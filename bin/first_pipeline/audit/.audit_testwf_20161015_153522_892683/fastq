@@ -1,0 +1,3 @@
+[fastq]
+task_exectime_sec: 0.005
+instance_name: fastq

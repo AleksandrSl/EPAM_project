@@ -1,0 +1,5 @@
+[fastqc]
+task_exectime_sec: 0.000
+instance_name: fastqc
+task_exectime_sec: 0.000
+instance_name: fastqc
