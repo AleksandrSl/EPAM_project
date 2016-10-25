@@ -1,0 +1,3 @@
+[fastqc]
+task_exectime_sec: 19.227
+instance_name: fastqc

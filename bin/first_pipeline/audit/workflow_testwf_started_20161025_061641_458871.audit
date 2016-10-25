@@ -1,0 +1,14 @@
+[mrg2]
+task_exectime_sec: 2.003
+instance_name: mrg2
+
+[t1a]
+task_exectime_sec: 1.001
+text: hej_hopp
+instance_name: t1a
+
+[t1b]
+task_exectime_sec: 1.002
+text: hopp_hej
+instance_name: t1b
+
