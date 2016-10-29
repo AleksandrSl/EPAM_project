@@ -52,8 +52,9 @@ class FastqcTask3(sl.Task):
 
     # Parameter
     in_data = None
+    n = None
     tool_path = '/home/aleksandrsl/Desktop/EPAM_project/tools/fastqc/fastqc'
-    outp_path = '/home/aleksandrsl/Desktop/EPAM_project/data/first_try/fastq_res_v3/'
+    outp_path = '/home/aleksandrsl/Desktop/EPAM_project/data/first_try/fastq_res_v3' + n +'/'
 
 
     def out_fastq(self):
@@ -99,8 +100,12 @@ class TrimmoTask(sl.ExternalTask):
 
     ###################################################################3
     # ILLUMINACLIP:<fastaWithAdaptersEtc>:<seed mismatches>:<palindrome clip threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
+    # MAXINFO:<targetLength>:<strictness>
     # SLIDINGWINDOW:<windowSize>:<requiredQuality>
     # LEADING:<quality>
+    # CROP:<length>
+    # TRAILING:<quality>
+    # HEADCROP: < length >
     ####################################################################
 
     # Implementation
@@ -122,3 +127,79 @@ class TrimmoTask(sl.ExternalTask):
 
 
     #luigi - -local - scheduler - -module luigi - ex.luigi - example Task2 - -samplename testsample Как запустить скрипт
+
+class TrimmoTaskWParameters(sl.ExternalTask):
+    """
+    Execute trimmomatic on fastq files
+    """
+    # Parameter
+    inp_data = None
+    trimmo_parameters = None
+    n = None
+
+    # default_trimmo_parameters = {'maxinfo': None,
+    # 'slidingwindow': None,
+    # 'leading': 30,
+    # 'crop': None,
+    # 'trailing': 30,
+    # 'headcrop': 15,
+    # }
+
+    default_trimmo_parameters = {'leading': 30,
+                                 'trailing': 30,
+                                 'headcrop': 15,
+                                 }
+
+    tool_path = '/home/aleksandrsl/Desktop/EPAM_project/tools/trimmomatic-0.36/trimmomatic-0.36.jar'
+    adapters_path = '/home/aleksandrsl/Desktop/EPAM_project/tools/trimmomatic-0.36/adapters/'
+    outp_path = '/home/aleksandrsl/Desktop/EPAM_project/data/first_try/trimmed_seqs' + n + '/'
+    adapter = 'TruSeq3-SE.fa'
+    outp_name = 'trimmed_seq'
+    adapter_full_path = adapters_path + adapter
+    outp_full_path = outp_path + outp_name
+
+    # I/O
+    def out_trimmo(self):
+        return sl.TargetInfo(self, self.outp_path + 'trimmo_res.txt')
+
+    ###################################################################3
+    # ILLUMINACLIP:<fastaWithAdaptersEtc>:<seed mismatches>:<palindrome clip threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
+    # MAXINFO:<targetLength>:<strictness>
+    # SLIDINGWINDOW:<windowSize>:<requiredQuality>
+    # LEADING:<quality>
+    # CROP:<length>
+    # TRAILING:<quality>
+    # HEADCROP: < length >
+    ####################################################################
+
+    # Implementation
+    def run(self):
+        utils.mkdir_if_not_exist(self.outp_path)
+        if not self.trimmo_parameters:
+            self.trimmo_parameters = self.default_trimmo_parameters
+        # cmd = 'java -jar {tool_path} PE -basein {fastq_file} -baseout {outp_full_path} ' \
+        #       'ILLUMINACLIP:{adapter_full_path}:2:30:10 MAXINFO:{maxinfo} ' \
+        #       'CROP:{crop} LEADING:{leading} ' \
+        #       'TRAILING:{trailing} HEADCROP:{headcrop} ' \
+        #       'SLIDINGWINDOW:{slidingwindow}'.format(tool_path=self.tool_path,
+        #                          outp_full_path=self.outp_full_path,
+        #                          adapter_full_path=self.adapter_full_path,
+        #                          fastq_file=self.inp_data[0],
+        #                          **self.trimmo_parameters
+        #                          )
+        cmd = 'java -jar {tool_path} PE -basein {fastq_file} -baseout {outp_full_path} ' \
+            'ILLUMINACLIP:{adapter_full_path}:2:30:10 ' \
+            'LEADING:{leading} ' \
+            'TRAILING:{trailing} ' \
+            'HEADCROP:{headcrop}'.format(tool_path=self.tool_path,
+                                 outp_full_path=self.outp_full_path,
+                                 adapter_full_path=self.adapter_full_path,
+                                 fastq_file=self.inp_data[0],
+                                 **self.trimmo_parameters
+                                 )
+
+        call(cmd, shell=True)
+        with self.out_trimmo().open('w') as outfile:
+            res = [trimmo_res  for trimmo_res in
+                glob.glob(self.outp_path + '*')]
+            json.dump(res, outfile)
