@@ -3,7 +3,11 @@
     <words>
       <w>fastq</w>
       <w>fastqc</w>
+      <w>mkdir</w>
+      <w>qual</w>
+      <w>trimmo</w>
       <w>trimmomatic</w>
+      <w>vals</w>
     </words>
   </dictionary>
 </component>
